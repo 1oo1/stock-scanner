@@ -6,8 +6,7 @@ numpy==2.1.2
 pandas==2.2.2
 
 # 数据获取和分析库
-akshare>=1.16.22
-
+akshare
 
 # 网络和API请求
 requests==2.32.3

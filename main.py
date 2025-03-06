@@ -98,65 +98,6 @@ def analyze():
         logger.exception(e)
         return jsonify({'error': error_msg}), 500
 
-@app.route('/test_api_connection', methods=['POST'])
-def test_api_connection():
-    """测试API连接"""
-    try:
-        logger.info("开始测试API连接")
-        data = request.json
-        api_url = data.get('api_url')
-        api_key = data.get('api_key')
-        api_model = data.get('api_model')
-        api_timeout = data.get('api_timeout', 10)  # 默认测试连接超时为10秒
-        
-        logger.debug(f"测试API连接: URL={api_url}, 模型={api_model}, API Key={'已提供' if api_key else '未提供'}, Timeout={api_timeout}")
-        
-        if not api_url:
-            logger.warning("未提供API URL")
-            return jsonify({'error': '请提供API URL'}), 400
-            
-        if not api_key:
-            logger.warning("未提供API Key")
-            return jsonify({'error': '请提供API Key'}), 400
-            
-        # 构建API URL
-        test_url = APIUtils.format_api_url(api_url)
-        logger.debug(f"完整API测试URL: {test_url}")
-        
-        # 发送测试请求
-        response = requests.post(
-            test_url,
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": api_model or "gpt-3.5-turbo",
-                "messages": [
-                    {"role": "user", "content": "Hello, this is a test message. Please respond with 'API connection successful'."}
-                ],
-                "max_tokens": 20
-            },
-            timeout=int(api_timeout)
-        )
-        
-        # 检查响应
-        if response.status_code == 200:
-            logger.info(f"API 连接测试成功: {response.status_code}")
-            return jsonify({'success': True, 'message': 'API 连接测试成功'})
-        else:
-            error_message = response.json().get('error', {}).get('message', '未知错误')
-            logger.warning(f"API连接测试失败: {response.status_code} - {error_message}")
-            return jsonify({'success': False, 'message': f'API 连接测试失败: {error_message}', 'status_code': response.status_code}), 400
-            
-    except requests.exceptions.RequestException as e:
-        logger.error(f"API 连接请求错误: {str(e)}")
-        return jsonify({'success': False, 'message': f'请求错误: {str(e)}'}), 400
-    except Exception as e:
-        logger.error(f"测试 API 连接时出错: {str(e)}")
-        logger.exception(e)
-        return jsonify({'success': False, 'message': f'API 测试连接时出错: {str(e)}'}), 500
-
 if __name__ == '__main__':
     flask_env = os.getenv('FLASK_ENV', 'development')
     app.run(host='0.0.0.0', port=8888, debug=(flask_env == 'development'), threaded=True)
