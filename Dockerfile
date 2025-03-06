@@ -23,4 +23,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8888
 
 # 启动命令
-CMD ["python", "web_server.py"]
+CMD ["python", "main.py"]
