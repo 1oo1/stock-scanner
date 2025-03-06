@@ -1,25 +1,14 @@
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
-from stock_analyzer import StockAnalyzer
-from us_stock_service import USStockService
-from fund_service import FundService  # 新增导入
-import threading
+from src.stock_analyzer import StockAnalyzer
 import os
-import traceback
 import requests
 from logger import get_logger
 from utils.api_utils import APIUtils
-# 加载环境变量
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # 获取日志器
 logger = get_logger()
 
 app = Flask(__name__)
-analyzer = StockAnalyzer()
-us_stock_service = USStockService()
-fund_service = FundService()  # 新增服务实例
 
 @app.route('/')
 def index():
@@ -109,36 +98,6 @@ def analyze():
         logger.exception(e)
         return jsonify({'error': error_msg}), 500
 
-@app.route('/search_us_stocks', methods=['GET'])
-def search_us_stocks():
-    try:
-        keyword = request.args.get('keyword', '')
-        if not keyword:
-            return jsonify({'error': '请输入搜索关键词'}), 400
-            
-        results = us_stock_service.search_us_stocks(keyword)
-        return jsonify({'results': results})
-        
-    except Exception as e:
-        print(f"搜索美股代码时出错: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-# 添加基金搜索路由
-@app.route('/search_funds', methods=['GET'])
-def search_funds():
-    try:
-        keyword = request.args.get('keyword', '')
-        market_type = request.args.get('market_type', '')
-        if not keyword:
-            return jsonify({'error': '请输入搜索关键词'}), 400
-            
-        results = fund_service.search_funds(keyword, market_type)
-        return jsonify({'results': results})
-        
-    except Exception as e:
-        logger.error(f"搜索基金代码时出错: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
 @app.route('/test_api_connection', methods=['POST'])
 def test_api_connection():
     """测试API连接"""
@@ -199,5 +158,6 @@ def test_api_connection():
         return jsonify({'success': False, 'message': f'API 测试连接时出错: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    logger.info("股票分析系统启动")
-    app.run(host='0.0.0.0', port=8888, debug=True)
+    flask_env = os.getenv('FLASK_ENV', 'development')
+    app.run(host='0.0.0.0', port=8888, debug=(flask_env == 'development'), threaded=True)
+    logger.info(f"股票分析系统启动，当前FLASK环境: {flask_env}")
