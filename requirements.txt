@@ -4,11 +4,9 @@
 # 基础科学计算和数据处理库
 numpy==2.1.2
 pandas==2.2.2
-scipy==1.15.1
 
 # 数据获取和分析库
 akshare==1.16.22
-tqdm==4.67.1
 
 
 # 网络和API请求
@@ -18,17 +16,3 @@ flask==3.1.0
 
 # 日志和系统工具
 loguru==0.7.2
-
-# 可选：数据可视化（未来扩展）
-matplotlib==3.9.2
-seaborn==0.13.2
-
-# 开发和调试工具
-ipython>=7.34.0
-
-# 其他依赖
-beautifulsoup4==4.12.3
-html5lib==1.1
-lxml==4.9.4
-jsonpath==0.82.2
-openpyxl==3.1.5

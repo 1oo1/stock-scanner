@@ -1,15 +1,38 @@
 version: '3.8'
 
 services:
+  # PostgreSQL database service
+  db:
+    image: postgres
+    container_name: stock-analyzer-db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: always
+
+  # Stock Analyzer application service
   stock-analyzer:
     build: .
+    container_name: stock-analyzer
     ports:
-      - "8888:8888"
+      - "127.0.0.1:8888:8888"
+    env_file:
+      - .env
     environment:
       - API_KEY=${API_KEY}
       - API_URL=${API_URL}
       - API_MODEL=${API_MODEL}
       - API_TIMEOUT=${API_TIMEOUT}
+      - DB_URL=${DB_URL:-"postgresql://$DB_USER:$DB_PASSWORD@db:5432/$DB_NAME"}
     volumes:
       - .:/app
     restart: unless-stopped
+    depends_on:
+      - db
