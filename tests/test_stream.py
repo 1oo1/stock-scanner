@@ -1,7 +1,7 @@
 import os
 import requests
 import json
-from logger import get_logger, get_stream_logger
+from utils.logger import get_logger, get_stream_logger
 from dotenv import load_dotenv
 from utils.api_utils import APIUtils
 

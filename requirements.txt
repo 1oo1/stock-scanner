@@ -12,6 +12,7 @@ akshare
 requests==2.32.3
 python-dotenv==1.0.1
 flask==3.1.0
+flask-jwt-extended==4.7.1
 
 # 日志和系统工具
 loguru==0.7.2

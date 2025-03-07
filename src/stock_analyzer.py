@@ -6,8 +6,8 @@ import requests
 from typing import Dict, List, Optional, Tuple, Generator
 from dotenv import load_dotenv
 import json
-from logger import get_logger
-from utils.api_utils import APIUtils
+from src.utils.logger import get_logger
+from src.utils.api_utils import APIUtils
 
 # 获取日志器
 logger = get_logger()
