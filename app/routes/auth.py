@@ -10,7 +10,6 @@ from flask import (
 )
 from flask_jwt_extended import (
     create_access_token,
-    jwt_required,
     unset_jwt_cookies,
     set_access_cookies,
     verify_jwt_in_request,
@@ -25,7 +24,7 @@ auth_bp = Blueprint("auth", __name__)
 
 
 def auth_or_login(f):
-    """Decorator to check if the user is authenticated, if not, to login."""
+    """Decorator to check if the user is authenticated, if not, redirect to login."""
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -33,7 +32,8 @@ def auth_or_login(f):
             # Check if the user is authenticated
             verify_jwt_in_request()
             return f(*args, **kwargs)
-        except:
+        except Exception as e:
+            logger.error(f"Auth error details: {type(e).__name__}: {str(e)}")
             # If not authenticated, redirect to login
             return redirect(url_for("auth.login"))
 
@@ -102,7 +102,7 @@ def login():
 
 
 @auth_bp.route("/logout", methods=["POST"])
-@jwt_required()
+@auth_or_login
 def logout():
     """Logout route to invalidate the JWT token."""
     # Invalidate the token by adding it to a blacklist (if implemented)

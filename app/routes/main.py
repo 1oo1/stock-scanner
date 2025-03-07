@@ -6,7 +6,6 @@ from flask import (
     request,
     stream_with_context,
 )
-from flask_jwt_extended import jwt_required
 from app.utils.logger import get_logger
 from app.services.stock_analyzer import StockAnalyzer
 from app.routes.auth import auth_or_login
@@ -25,7 +24,7 @@ def index():
 
 
 @main_bp.route("/analyze", methods=["POST"])
-@jwt_required
+@auth_or_login
 def analyze():
     try:
         logger.info("开始处理分析请求")

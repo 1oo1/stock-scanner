@@ -7,6 +7,74 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
+
+    <!-- 添加公告栏 -->
+    {% if announcement %}
+    <div id="announcement-container" class="fixed top-4 right-4 max-w-md z-50 animate-fade-in-down">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3 pr-8">
+                    <p class="text-sm text-blue-700 whitespace-pre-line" id="announcement-text"></p>
+                    <p class="text-xs text-gray-500 mt-1" id="announcement-timer"></p>
+                </div>
+                <button onclick="closeAnnouncement()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 处理公告文本中的URL
+        const announcementText = `{{ announcement }}`;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        document.getElementById('announcement-text').innerHTML = announcementText.replace(
+            urlRegex, 
+            '<a href="$1" target="_blank" class="text-blue-600 hover:text-blue-800 underline">$1</a>'
+        );
+
+        // 设置自动关闭时间（5秒）
+        const autoCloseTime = 5;
+        let remainingTime = autoCloseTime;
+        const timerElement = document.getElementById('announcement-timer');
+
+        // 更新倒计时显示
+        function updateTimer() {
+            timerElement.textContent = `${remainingTime}秒后自动关闭`;
+            if (remainingTime <= 0) {
+                closeAnnouncement();
+            } else {
+                remainingTime--;
+                setTimeout(updateTimer, 1000);
+            }
+        }
+
+        // 启动倒计时
+        updateTimer();
+
+        // 关闭公告的函数
+        function closeAnnouncement() {
+            const container = document.getElementById('announcement-container');
+            if(!container){
+                return;
+            }
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(-10px)';
+            container.style.transition = 'all 0.3s ease-out';
+            setTimeout(() => {
+                container.remove();
+            }, 300);
+        }
+    </script>
+    {% endif %}
+
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold mb-8 text-center">股票分析系统</h1>
 
@@ -157,7 +225,72 @@
             <!-- 批量分析 -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4">股票批量分析</h2>
-            
+                
+                <!-- API配置部分 -->
+                <div class="mb-6 border-b pb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-700">API配置</h3>
+                        <button id="toggleApiConfig" class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
+                            <span id="toggleApiConfigText">显示配置</span>
+                            <svg id="toggleApiConfigIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div id="apiConfigPanel" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="apiUrl" class="block text-sm font-medium text-gray-700 mb-1">API URL</label>
+                                <input type="text" id="apiUrl" 
+                                       class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="例如: https://api.openai.com" 
+                                       value="{{ default_api_url }}"
+                                       oninput="updateFormattedUrl(this.value)">
+                                <p id="formattedUrl" class="mt-1 text-sm text-gray-500 break-all"></p>
+                            </div>
+                            <div>
+                                <label for="apiModel" class="block text-sm font-medium text-gray-700 mb-1">API 模型</label>
+                                <input type="text" id="apiModel" 
+                                       class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="例如: gpt-3.5-turbo" 
+                                       value="{{ default_api_model }}">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="apiKey" class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                                <input type="password" id="apiKey" 
+                                       class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="输入您的API Key">
+                                <p class="mt-1 text-sm text-gray-500">如不填写，将使用系统默认配置</p>
+                            </div>
+                            <div>
+                                <label for="apiTimeout" class="block text-sm font-medium text-gray-700 mb-1">API 超时时间 (秒)</label>
+                                <input type="number" id="apiTimeout" 
+                                       class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="例如: 60" 
+                                       value="{{ default_api_timeout }}" min="1" max="300">
+                                <p class="mt-1 text-sm text-gray-500">请求超时时间，默认60秒</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="saveApiConfig" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="saveApiConfig" class="ml-2 block text-sm text-gray-700">保存配置到本地</label>
+                            </div>
+                            <div>
+                                <button id="resetApiConfig" class="text-gray-600 hover:text-gray-800 text-sm mr-3">
+                                    重置为默认
+                                </button>
+                                <button id="testApiConfig" class="bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 text-sm">
+                                    测试连接
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- 添加市场类型选择 -->
                 <div class="mb-4">
                     <label for="marketType" class="block text-sm font-medium text-gray-700 mb-2">
@@ -501,11 +634,19 @@
                 resultsContainer.className = 'space-y-6';
                 resultContent.appendChild(resultsContainer);
 
+                // Get CSRF token from cookies
+                function getCookie(name) {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) return parts.pop().split(';').shift();
+                }
                 // 使用fetch流式API
                 const response = await fetch('/analyze', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCookie('csrf_access_token')
                     },
                     body: JSON.stringify({ 
                         stock_codes: stockCodes,
@@ -591,56 +732,14 @@
             if (chunk.error) {
                 // 添加或更新显示错误的卡片
                 let errorCard = document.getElementById(`error-${stockCode}`);
-                
-                // 处理错误信息，提取关键部分
-                let errorMessage = chunk.error;
-                
-                // 移除多余的错误前缀
-                errorMessage = errorMessage.replace(/获取股票数据失败: /g, '');
-                
-                // 格式化错误信息
-                let formattedError = errorMessage;
-                
-                // 针对特定类型的错误提供更友好的提示
-                if (errorMessage.includes('无效的A股股票代码格式')) {
-                    formattedError = `<strong>股票代码格式错误</strong>: ${stockCode} 不是有效的A股代码<br>
-                                     <small>A股代码应以0、3、6、688或8开头</small>`;
-                } else if (errorMessage.includes('股票代码格式错误')) {
-                    formattedError = `<strong>股票代码格式错误</strong>: ${errorMessage.split(':')[1] || errorMessage}`;
-                } else if (errorMessage.includes('数据为空')) {
-                    formattedError = `<strong>数据获取失败</strong>: 未找到股票 ${stockCode} 的交易数据`;
-                }
-                
                 if (!errorCard) {
                     errorCard = document.createElement('div');
                     errorCard.id = `error-${stockCode}`;
-                    errorCard.className = 'bg-red-50 p-4 rounded-lg text-red-600 mb-4 flex items-start';
-                    
-                    // 添加警告图标
-                    errorCard.innerHTML = `
-                        <div class="mr-3 flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium">股票 ${stockCode} 分析失败</p>
-                            <p class="mt-1 text-sm">${formattedError}</p>
-                        </div>
-                    `;
+                    errorCard.className = 'bg-red-50 p-4 rounded-lg text-red-600';
+                    errorCard.innerHTML = `分析 ${stockCode} 出错: ${chunk.error}`;
                     container.appendChild(errorCard);
                 } else {
-                    errorCard.innerHTML = `
-                        <div class="mr-3 flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium">股票 ${stockCode} 分析失败</p>
-                            <p class="mt-1 text-sm">${formattedError}</p>
-                        </div>
-                    `;
+                    errorCard.innerHTML = `分析 ${stockCode} 出错: ${chunk.error}`;
                 }
                 return;
             }
