@@ -67,8 +67,8 @@
 <body>
     <div class="login-container">
         <h2>股票分析工具</h2>
-        {% if error %}
-        <div class="error-message">{{ error }}</div>
+        {% if error_msg %}
+        <div class="error-message">{{ error_msg }}</div>
         {% endif %}
         <form action="/login" method="post">
             <div class="form-group">

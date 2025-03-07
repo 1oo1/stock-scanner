@@ -25,6 +25,9 @@ class Config:
     # postgresql
     SQLALCHEMY_DATABASE_URI = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 
+    ENABLE_REGISTER_USER = os.getenv("ENABLE_REGISTER_USER", "False") == "True"
+    REGISTER_PRIVATE_KEY = os.getenv("REGISTER_PRIVATE_KEY")
+
 
 def get_flask_config():
     """

@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, render_template
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from app.config import get_flask_config
@@ -10,6 +11,7 @@ logger = get_logger()
 # Initialize extensions
 db = SQLAlchemy()
 jwt = JWTManager()
+migrate = Migrate()
 
 
 def create_app():
@@ -22,6 +24,7 @@ def create_app():
 
     # Initialize extensions with app
     db.init_app(app)
+    migrate.init_app(app, db)
     jwt.init_app(app)
 
     # Register blueprints
@@ -33,6 +36,8 @@ def create_app():
     # Optional: Register error handlers
     @app.errorhandler(404)
     def not_found(error):
-        return "Not found", 404
+        # to page_not_found
+        logger.error("访问了不存在的页面")
+        return render_template("404.html"), 404
 
     return app
