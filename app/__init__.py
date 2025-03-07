@@ -21,7 +21,7 @@ def create_app():
     app.config.from_object(get_flask_config())
 
     # Initialize extensions with app
-    # db.init_app(app)
+    db.init_app(app)
     jwt.init_app(app)
 
     # Register blueprints
@@ -33,6 +33,6 @@ def create_app():
     # Optional: Register error handlers
     @app.errorhandler(404)
     def not_found(error):
-        return {"error": "Not found"}, 404
+        return "Not found", 404
 
     return app

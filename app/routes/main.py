@@ -17,9 +17,10 @@ main_bp = Blueprint("main", __name__)
 logger = get_logger()
 
 
-@main_bp.route("/index")
+@main_bp.route("/")
 @auth_or_login
 def index():
+    logger.info("访问首页")
     return render_template("index.html")
 
 

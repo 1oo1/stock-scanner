@@ -5,4 +5,4 @@ pip install --no-cache-dir --upgrade -r requirements.txt
 
 # 安装并运行 Gunicorn
 pip install gunicorn
-gunicorn -w 2 'app:create_app()'
+gunicorn -w 2 'app:create_app()' --bind ${FLASK_HOST}:${FLASK_PORT}

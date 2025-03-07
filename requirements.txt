@@ -16,3 +16,8 @@ flask-jwt-extended==4.7.1
 
 # 日志和系统工具
 loguru==0.7.2
+
+# 数据库和ORM
+flask-sqlalchemy==3.1.1
+Flask-Migrate==4.1.0
+psycopg2-binary==2.9.10
