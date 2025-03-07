@@ -1,39 +1,30 @@
 from flask import (
-    Flask,
+    Blueprint,
+    Response,
+    jsonify,
     render_template,
     request,
-    jsonify,
-    Response,
     stream_with_context,
 )
-from src.stock_analyzer import StockAnalyzer
-import os
-from src.utils.logger import get_logger
+from flask_jwt_extended import jwt_required
+from app.utils.logger import get_logger
+from app.services.stock_analyzer import StockAnalyzer
+from app.routes.auth import auth_or_login
 
-# 获取日志器
+# Create a blueprint for the main routes
+main_bp = Blueprint("main", __name__)
+
 logger = get_logger()
 
-app = Flask(__name__, template_folder="../templates")
 
-
-@app.route("/")
+@main_bp.route("/index")
+@auth_or_login
 def index():
-    announcement = os.getenv("ANNOUNCEMENT_TEXT") or None
-    # 获取默认API配置信息
-    default_api_url = os.getenv("API_URL", "")
-    default_api_model = os.getenv("API_MODEL", "gpt-3.5-turbo")
-    default_api_timeout = os.getenv("API_TIMEOUT", "60")
-    # 不传递API_KEY到前端，出于安全考虑
-    return render_template(
-        "index.html",
-        announcement=announcement,
-        default_api_url=default_api_url,
-        default_api_model=default_api_model,
-        default_api_timeout=default_api_timeout,
-    )
+    return render_template("index.html")
 
 
-@app.route("/analyze", methods=["POST"])
+@main_bp.route("/analyze", methods=["POST"])
+@jwt_required
 def analyze():
     try:
         logger.info("开始处理分析请求")
