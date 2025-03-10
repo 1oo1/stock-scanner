@@ -9,6 +9,27 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="{{ url_for('static', filename='init.js') }}"></script>
+  <style>
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: white;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      border-radius: 0.25rem;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -22,10 +43,26 @@
         <ul class="flex space-x-4">
           <li><a href="/" class="text-gray-600 hover:text-blue-500 flex items-center"><i data-lucide="home"
                 class="mr-1 w-4 h-4"></i>首页</a></li>
-          <li><a href="/analysis" class="text-gray-600 hover:text-blue-500 flex items-center"><i data-lucide="activity"
-                class="mr-1 w-4 h-4"></i>分析</a></li>
+          <li><a href="/tech_analysis" class="text-gray-600 hover:text-blue-500 flex items-center"><i
+                data-lucide="activity" class="mr-1 w-4 h-4"></i>技术分析</a></li>
           <li><a href="/scanner" class="text-gray-600 hover:text-blue-500 flex items-center"><i data-lucide="search"
-                class="mr-1 w-4 h-4"></i>扫描</a></li>
+                class="mr-1 w-4 h-4"></i>DCF模型</a></li>
+
+          {% if current_user.is_authenticated %}
+          <li class="dropdown">
+            <a href="#" class="text-gray-600 hover:text-blue-500 flex items-center">
+              <i data-lucide="user" class="mr-1 w-4 h-4"></i>{{ current_user.username }}
+            </a>
+            <div class="dropdown-content">
+              <a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">修改密码</a>
+              <a href="/logout" class="block px-4 py-2 text-gray-700 hover:bg-blue-50" id="logout-link">退出登录</a>
+            </div>
+          </li>
+          {% else %}
+          <li><a href="/login" class="text-gray-600 hover:text-blue-500 flex items-center"><i data-lucide="log-in"
+                class="mr-1 w-4 h-4"></i>登录</a></li>
+          {% endif %}
+
         </ul>
       </nav>
     </div>
@@ -35,9 +72,16 @@
     {% block content %}{% endblock %}
   </main>
 
-
-
   {% block extra_js %}{% endblock %}
 </body>
+
+<footer>
+  <div class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2023 祝您发财. All rights reserved.</p>
+      <p>Powered by AKShare & Flask & Tailwind CSS</p>
+    </div>
+  </div>
+</footer>
 
 </html>

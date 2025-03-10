@@ -1,8 +1,7 @@
-from datetime import datetime
 from flask import Flask, render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
 from app.config import get_flask_config
 from app.utils.logger import get_logger
 
@@ -42,7 +41,17 @@ def create_app():
         return render_template("404.html"), 404
 
     @app.context_processor
-    def inject_now():
-        return {"now": datetime.utcnow()}
+    def inject_global():
+        current_user = {"is_authenticated": False, "username": None}
+        try:
+            verify_jwt_in_request(optional=True)
+            user_name = get_jwt_identity()
+            if user_name:
+                current_user["is_authenticated"] = True
+                current_user["username"] = user_name
+        except Exception as e:
+            pass
+
+        return {"current_user": current_user}
 
     return app

@@ -34,8 +34,8 @@ def auth_or_login(f):
             return f(*args, **kwargs)
         except Exception as e:
             logger.error(f"Auth error details: {type(e).__name__}: {str(e)}")
-            # If not authenticated, redirect to login
-            return redirect(url_for("auth.login"))
+            # If not authenticated, redirect to login with the current URL
+            return redirect(url_for("auth.login", next=request.url))
 
     return decorated_function
 
@@ -92,7 +92,9 @@ def login():
 
     if user and user.check_password(password):
         access_token = create_access_token(identity=user.username)
-        response = redirect(url_for("main.index"))
+        # Get the next URL if it exists, otherwise default to main.index
+        next_url = request.args.get("next", url_for("main.index"))
+        response = redirect(next_url)
         set_access_cookies(response, access_token)
         logger.info(f"登录成功: {username}")
         return response
@@ -101,13 +103,14 @@ def login():
         return render_template("login.html", error_msg="Bad username or password")
 
 
-@auth_bp.route("/logout", methods=["POST"])
+@auth_bp.route("/logout", methods=["GET"])
 @auth_or_login
 def logout():
     """Logout route to invalidate the JWT token."""
     # Invalidate the token by adding it to a blacklist (if implemented)
     # clear cookie
-    response = redirect(url_for("auth.login"))
+    response = redirect(url_for("main.index"))
     unset_jwt_cookies(response)
 
+    logger.info("用户登出")
     return response

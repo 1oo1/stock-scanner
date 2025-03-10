@@ -18,10 +18,14 @@ logger = get_logger()
 
 
 @main_bp.route("/")
-@auth_or_login
 def index():
-    logger.info("访问首页")
     return render_template("index.html")
+
+
+@main_bp.route("/tech_analysis")
+@auth_or_login
+def tech_analysis():
+    return render_template("tech_analysis.html")
 
 
 @main_bp.route("/analyze", methods=["POST"])
