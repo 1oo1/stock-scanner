@@ -7,12 +7,14 @@ from flask import (
     request,
     url_for,
     current_app,
+    flash,
 )
 from flask_jwt_extended import (
     create_access_token,
     unset_jwt_cookies,
     set_access_cookies,
     verify_jwt_in_request,
+    get_jwt_identity,
 )
 
 from app.models import User
@@ -114,3 +116,33 @@ def logout():
 
     logger.info("用户登出")
     return response
+
+
+@auth_bp.route("/profile", methods=["GET", "POST"])
+@auth_or_login
+def profile():
+    """Profile page to view and update user information."""
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+
+    if request.method == "POST":
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+
+        if not user.check_password(current_password):
+            return render_template(
+                "profile.html", user=user, error_msg="当前密码不正确"
+            )
+
+        if new_password != confirm_password:
+            return render_template(
+                "profile.html", user=user, error_msg="两次输入的新密码不匹配"
+            )
+
+        user.set_password(new_password)
+        db.session.commit()
+        logger.info(f"密码已更改: {username}")
+        return render_template("profile.html", user=user, success_msg="密码更新成功")
+
+    return render_template("profile.html", user=user)
