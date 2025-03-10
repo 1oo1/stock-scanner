@@ -46,7 +46,7 @@ def auth_or_login(f):
 def register():
     """Register route to create a new user."""
     if current_app.config["ENABLE_REGISTER_USER"] is False:
-        return "{'msg': 'not found'}", 404
+        return render_template("register.html", disabled_register=True)
 
     if request.method == "GET":
         return render_template("register.html")
@@ -126,23 +126,29 @@ def profile():
     user = User.query.filter_by(username=username).first()
 
     if request.method == "POST":
-        current_password = request.form.get("current_password")
-        new_password = request.form.get("new_password")
-        confirm_password = request.form.get("confirm_password")
+        # Handle JSON request from API
+        data = request.get_json()
+        current_password = data.get("current_password")
+        new_password = data.get("new_password")
+        confirm_password = data.get("confirm_password")
 
         if not user.check_password(current_password):
-            return render_template(
-                "profile.html", user=user, error_msg="当前密码不正确"
-            )
+            return {"success": False, "error": "当前密码不正确"}, 400
 
         if new_password != confirm_password:
-            return render_template(
-                "profile.html", user=user, error_msg="两次输入的新密码不匹配"
-            )
+            return {"success": False, "error": "两次输入的新密码不匹配"}, 400
 
-        user.set_password(new_password)
-        db.session.commit()
-        logger.info(f"密码已更改: {username}")
-        return render_template("profile.html", user=user, success_msg="密码更新成功")
+        try:
+            user.set_password(new_password)
+            db.session.commit()
+            logger.info(f"密码已更改: {username}")
+        except ValueError as e:
+            # Handle password validation errors
+            return {"success": False, "error": str(e)}, 400
+        except Exception as e:
+            logger.error(f"密码更新失败: {username}, 错误: {str(e)}")
+            return {"success": False, "error": "密码更新失败"}, 500
+
+        return {"success": True, "message": "密码更新成功"}, 200
 
     return render_template("profile.html", user=user)

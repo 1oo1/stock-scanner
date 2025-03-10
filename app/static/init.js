@@ -1,6 +1,3 @@
-// 初始化Lucide图标
-lucide.createIcons();
-
 // 创建防抖函数
 function debounce(func, wait) {
   let timeout;
@@ -19,6 +16,15 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
+function csrf_token() {
+  const csrfToken = getCookie('csrf_access_token');
+  if (!csrfToken) {
+    console.error('CSRF token not found');
+    return '';
+  }
+  return csrfToken;
+}
+
 // 全局API服务
 const apiService = {
   async _fetch(url, data = {}, method = 'POST') {
@@ -27,10 +33,10 @@ const apiService = {
         method: method,
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCookie('csrf_access_token') || '',
+          'X-CSRF-TOKEN': csrf_token(),
         },
         body: JSON.stringify(data),
-        credentials: 'include',
+        credentials: 'same-origin',
       });
 
       if (!response.ok) {
