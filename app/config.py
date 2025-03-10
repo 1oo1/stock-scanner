@@ -19,7 +19,6 @@ class Config:
     )
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_SECURE = os.getenv("JWT_COOKIE_SECURE", "False") == "True"
-    JWT_COOKIE_CSRF_PROTECT = True
     JWT_COOKIE_SAMESITE = "Lax"
 
     # postgresql
@@ -27,6 +26,13 @@ class Config:
 
     ENABLE_REGISTER_USER = os.getenv("ENABLE_REGISTER_USER", "False") == "True"
     REGISTER_PRIVATE_KEY = os.getenv("REGISTER_PRIVATE_KEY")
+
+    LLM_CONFIGS = {
+        "API_KEY": os.getenv("API_KEY"),
+        "API_URL": os.getenv("API_URL"),
+        "API_MODEL": os.getenv("API_MODEL"),
+        "API_TIMEOUT": int(os.getenv("API_TIMEOUT", "60")),
+    }
 
 
 def get_flask_config():
@@ -36,17 +42,3 @@ def get_flask_config():
         Config: Flask configuration class.
     """
     return Config
-
-
-def get_llm_config():
-    """
-    Load LLM configuration from environment variables.
-    Returns:
-        dict: LLM configuration settings: API_KEY, API_URL, API_MODEL, API_TIMEOUT
-    """
-    return {
-        "API_KEY": os.getenv("API_KEY"),
-        "API_URL": os.getenv("API_URL"),
-        "API_MODEL": os.getenv("API_MODEL"),
-        "API_TIMEOUT": int(os.getenv("API_TIMEOUT", "60")),
-    }

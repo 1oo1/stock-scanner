@@ -3,8 +3,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import os
 import requests
-from typing import Dict, List, Optional, Tuple, Generator
-from dotenv import load_dotenv
+from typing import Generator
 import json
 from app.utils.logger import get_logger
 from app.utils.api_utils import APIUtils
@@ -16,25 +15,16 @@ logger = get_logger()
 class StockAnalyzer:
     def __init__(
         self,
-        initial_cash=1000000,
         custom_api_url=None,
         custom_api_key=None,
         custom_api_model=None,
         custom_api_timeout=None,
     ):
-
-        # 加载环境变量
-        load_dotenv()
-
         # 设置 API 配置，优先使用自定义配置，否则使用环境变量
-        self.API_URL = custom_api_url or os.getenv("API_URL")
-        self.API_KEY = custom_api_key or os.getenv("API_KEY")
-        self.API_MODEL = custom_api_model or os.getenv("API_MODEL", "gpt-3.5-turbo")
-        self.API_TIMEOUT = int(custom_api_timeout or os.getenv("API_TIMEOUT", 60))
-
-        logger.debug(
-            f"初始化StockAnalyzer: API_URL={self.API_URL}, API_MODEL={self.API_MODEL}, API_KEY={'已提供' if self.API_KEY else '未提供'}, API_TIMEOUT={self.API_TIMEOUT}"
-        )
+        self.API_URL = custom_api_url
+        self.API_KEY = custom_api_key
+        self.API_MODEL = custom_api_model
+        self.API_TIMEOUT = int(custom_api_timeout or 60)
 
         # 配置参数 - 分市场类型设置不同参数
         self.market_params = {

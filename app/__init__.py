@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, render_template
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -39,5 +40,9 @@ def create_app():
         # to page_not_found
         logger.error("访问了不存在的页面")
         return render_template("404.html"), 404
+
+    @app.context_processor
+    def inject_now():
+        return {"now": datetime.utcnow()}
 
     return app

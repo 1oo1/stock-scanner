@@ -1,12 +1,12 @@
 from flask import (
     Blueprint,
     Response,
+    current_app,
     jsonify,
     render_template,
     request,
     stream_with_context,
 )
-from flask_jwt_extended import jwt_required
 from app.utils.logger import get_logger
 from app.services.stock_analyzer import StockAnalyzer
 from app.routes.auth import auth_or_login
@@ -25,7 +25,7 @@ def index():
 
 
 @main_bp.route("/analyze", methods=["POST"])
-@jwt_required
+@auth_or_login
 def analyze():
     try:
         logger.info("开始处理分析请求")
@@ -37,15 +37,27 @@ def analyze():
             f"接收到分析请求: stock_codes={stock_codes}, market_type={market_type}"
         )
 
-        # 获取自定义API配置
-        custom_api_url = data.get("api_url")
-        custom_api_key = data.get("api_key")
-        custom_api_model = data.get("api_model")
-        custom_api_timeout = data.get("api_timeout")
+        app_config = current_app.config.get("LLM_CONFIGS")
+        custom_api_url = app_config.get("API_URL")
+        # Get all API keys and rotate through them
+        api_keys = app_config.get("API_KEY", "").split(",")
 
-        logger.debug(
-            f"自定义API配置: URL={custom_api_url}, 模型={custom_api_model}, API Key={'已提供' if custom_api_key else '未提供'}, Timeout={custom_api_timeout}"
-        )
+        global last_key_index
+        # Initialize last_key_index if it doesn't exist yet
+        if "last_key_index" not in globals():
+            last_key_index = 0
+
+        # Get the current key
+        current_index = last_key_index % len(api_keys)
+        custom_api_key = api_keys[current_index].strip()
+
+        # Update index for next use
+        last_key_index = (last_key_index + 1) % len(api_keys)
+
+        logger.debug(f"Using API key index {current_index} of {len(api_keys)}")
+
+        custom_api_model = app_config.get("API_MODEL")
+        custom_api_timeout = app_config.get("API_TIMEOUT")
 
         # 创建新的分析器实例，使用自定义配置
         custom_analyzer = StockAnalyzer(

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}祝您发财{% endblock %}</title>
+  <meta name="description" content="技术分析和AI智能评估系统">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="{{ url_for('static', filename='init.js') }}"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+  <header class="bg-white shadow-md">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="text-xl font-bold text-gray-800 flex items-center">
+        <i data-lucide="bar-chart-2" class="mr-2"></i>
+        祝您发财
+      </a>
+      <nav>
+        <ul class="flex space-x-4">
+          <li><a href="/" class="text-gray-600 hover:text-blue-500 flex items-center"><i data-lucide="home"
+                class="mr-1 w-4 h-4"></i>首页</a></li>
+          <li><a href="/analysis" class="text-gray-600 hover:text-blue-500 flex items-center"><i data-lucide="activity"
+                class="mr-1 w-4 h-4"></i>分析</a></li>
+          <li><a href="/scanner" class="text-gray-600 hover:text-blue-500 flex items-center"><i data-lucide="search"
+                class="mr-1 w-4 h-4"></i>扫描</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+
+
+  {% block extra_js %}{% endblock %}
+</body>
+
+</html>
