@@ -7,7 +7,6 @@ from flask import (
     request,
     url_for,
     current_app,
-    flash,
 )
 from flask_jwt_extended import (
     create_access_token,

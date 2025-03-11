@@ -123,10 +123,6 @@
                     return;
                 }
 
-                const stockCodes = stockInput.split(/[\n,]/)
-                    .map(code => code.trim())
-                    .filter(code => code.length > 0);
-
                 try {
                     isAnalyzing = true;
                     analyzeBtn.disabled = true;
@@ -143,7 +139,7 @@
                     resultContent.appendChild(resultsContainer);
 
                     for await (const chunk of apiService.stream('/analyze', {
-                        stock_codes: stockCodes,
+                        stock_code: stockInput,
                         market_type: marketType,
                     })) {
                         handleStreamChunk(chunk, resultsContainer, marketType);
