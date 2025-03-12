@@ -3,33 +3,50 @@ from flask import (
     Response,
     current_app,
     jsonify,
-    render_template,
     request,
     stream_with_context,
 )
 from app.utils.logger import get_logger
 from app.services.stock_analyzer import StockAnalyzer
-from app.routes.auth import auth_or_login
+from app.services.stock_search import StockSearchService
+from flask_jwt_extended import jwt_required
 
-# Create a blueprint for the main routes
-main_bp = Blueprint("main", __name__)
+# Create a blueprint for the API routes
+apis_bp = Blueprint("apis", __name__)
 
 logger = get_logger()
 
 
-@main_bp.route("/")
-def index():
-    return render_template("index.html")
+@apis_bp.route("/search", methods=["GET"])
+@jwt_required()
+def search_stocks():
+    """Route for searching stocks by code or name"""
+    try:
+        keyword = request.args.get("q", "")
+        max_results = int(request.args.get("limit", 20))
+
+        if not keyword:
+            return jsonify({"error": "请提供搜索关键词"}), 400
+
+        logger.info(f"处理股票搜索请求: 关键词='{keyword}', 最大结果数={max_results}")
+
+        # Initialize the search service
+        search_service = StockSearchService()
+
+        # Perform the search
+        results = search_service.search_stocks(keyword=keyword, max_results=max_results)
+
+        return jsonify({"success": True, "count": len(results), "results": results})
+
+    except Exception as e:
+        error_msg = f"股票搜索出错: {str(e)}"
+        logger.error(error_msg)
+        logger.exception(e)
+        return jsonify({"error": error_msg}), 500
 
 
-@main_bp.route("/tech_analysis")
-@auth_or_login
-def tech_analysis():
-    return render_template("tech_analysis.html")
-
-
-@main_bp.route("/analyze", methods=["POST"])
-@auth_or_login
+@apis_bp.route("/analyze", methods=["POST"])
+@jwt_required()
 def analyze():
     try:
         logger.info("开始处理分析请求")

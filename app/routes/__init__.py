@@ -1,6 +1,14 @@
 # API routes/blueprints
-from app.routes.auth import auth_bp
-from app.routes.main import main_bp
+from flask import Flask
 
-# List of all blueprints for easier registration
-all_blueprints = [auth_bp, main_bp]
+
+def init_app_routes(app: Flask):
+    # Import blueprints
+    from app.routes.apis import apis_bp
+    from app.routes.pages import pages_bp
+    from app.routes.auth import auth_bp
+
+    # Register blueprints with the app
+    app.register_blueprint(apis_bp)
+    app.register_blueprint(pages_bp)
+    app.register_blueprint(auth_bp)

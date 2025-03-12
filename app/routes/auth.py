@@ -79,7 +79,7 @@ def login():
     # Check if already authenticated
     try:
         verify_jwt_in_request()
-        return redirect(url_for("main.index"))
+        return redirect(url_for("pages.index"))
     except:
         pass
 
@@ -93,8 +93,8 @@ def login():
 
     if user and user.check_password(password):
         access_token = create_access_token(identity=user.username)
-        # Get the next URL if it exists, otherwise default to main.index
-        next_url = request.args.get("next", url_for("main.index"))
+        # Get the next URL if it exists, otherwise default to pages.index
+        next_url = request.args.get("next", url_for("pages.index"))
         response = redirect(next_url)
         set_access_cookies(response, access_token)
         logger.info(f"登录成功: {username}")
@@ -110,7 +110,7 @@ def logout():
     """Logout route to invalidate the JWT token."""
     # Invalidate the token by adding it to a blacklist (if implemented)
     # clear cookie
-    response = redirect(url_for("main.index"))
+    response = redirect(url_for("pages.index"))
     unset_jwt_cookies(response)
 
     logger.info("用户登出")

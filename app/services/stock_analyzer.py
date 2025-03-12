@@ -1,12 +1,8 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import os
-import requests
-from typing import Generator
 import json
 from app.utils.logger import get_logger
-from app.utils.api_utils import APIUtils
 
 # 获取日志器
 logger = get_logger()
