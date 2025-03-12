@@ -1,113 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}祝您发财 - 股票技术分析工具{% endblock %}
+{% block title %}祝您发财{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-  <!-- Hero Section -->
-  <section class="py-12 md:py-20">
+<div class="max-w-5xl mx-auto px-4">
+  <!-- Simplified Hero Section -->
+  <section class="py-10 border-b border-gray-200">
     <div class="text-center">
-      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">智能股票分析系统</h1>
-      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-        结合技术分析和人工智能，为您提供专业的股票市场洞察。
+      <h1 class="text-3xl font-bold text-gray-800 mb-3">祝您发财</h1>
+      <p class="text-gray-600 max-w-2xl mx-auto mb-8">
+        简单高效的股票分析，助您做出明智的投资决策
       </p>
-      <div class="mt-10 flex flex-col md:flex-row justify-center gap-4">
-        <a href="/tech_analysis"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition flex items-center justify-center">
-          <i data-lucide="activity" class="mr-2 w-5 h-5"></i>
-          开始技术分析
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/tech_analysis" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-5 rounded transition">
+          技术分析
         </a>
-        <a href="/scanner"
-          class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition flex items-center justify-center">
-          <i data-lucide="search" class="mr-2 w-5 h-5"></i>
+        <a href="/scanner" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-5 rounded transition">
           DCF模型评估
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="py-12 bg-white rounded-xl shadow-sm">
-    <div class="text-center mb-12">
-      <h2 class="text-3xl font-bold text-gray-900">主要功能</h2>
-      <p class="text-gray-600 mt-2">我们提供全方位的股票分析工具</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-6">
-      <div class="p-6 border border-gray-200 rounded-lg">
-        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i data-lucide="bar-chart-2" class="text-blue-600"></i>
-        </div>
-        <h3 class="text-xl font-semibold text-center mb-3">技术指标分析</h3>
-        <p class="text-gray-600 text-center">
-          分析多种技术指标，包括MACD、KDJ、RSI等，提供趋势判断和买卖建议。
-        </p>
-      </div>
-
-      <div class="p-6 border border-gray-200 rounded-lg">
-        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i data-lucide="trending-up" class="text-green-600"></i>
-        </div>
-        <h3 class="text-xl font-semibold text-center mb-3">AI智能评估</h3>
-        <p class="text-gray-600 text-center">
-          结合人工智能技术，对股票进行全面评估，提供专业分析和投资建议。
-        </p>
-      </div>
-
-      <div class="p-6 border border-gray-200 rounded-lg">
-        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i data-lucide="search" class="text-purple-600"></i>
-        </div>
-        <h3 class="text-xl font-semibold text-center mb-3">批量股票扫描</h3>
-        <p class="text-gray-600 text-center">
-          同时分析多只股票，快速筛选出潜在的投资机会，提高投资效率。
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works Section -->
-  <section class="py-12 mt-8">
-    <div class="text-center mb-10">
-      <h2 class="text-3xl font-bold text-gray-900">使用方法</h2>
-      <p class="text-gray-600 mt-2">简单三步，获取专业分析</p>
-    </div>
-
+  <!-- Simplified Features -->
+  <section class="py-8 border-b border-gray-200">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="text-center">
-        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span class="text-2xl font-bold text-blue-600">1</span>
+        <div class="mb-3">
+          <i data-lucide="bar-chart-2" class="inline-block text-blue-600 h-6 w-6"></i>
         </div>
-        <h3 class="text-xl font-semibold mb-2">输入股票代码</h3>
-        <p class="text-gray-600">输入单个或多个股票代码，支持A股、港股和美股</p>
+        <h3 class="font-medium mb-1">技术指标分析</h3>
+        <p class="text-sm text-gray-600">MACD、KDJ、RSI等技术指标分析</p>
       </div>
 
       <div class="text-center">
-        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span class="text-2xl font-bold text-blue-600">2</span>
+        <div class="mb-3">
+          <i data-lucide="trending-up" class="inline-block text-blue-600 h-6 w-6"></i>
         </div>
-        <h3 class="text-xl font-semibold mb-2">选择分析类型</h3>
-        <p class="text-gray-600">选择技术分析或DCF模型分析方式</p>
+        <h3 class="font-medium mb-1">AI评估</h3>
+        <p class="text-sm text-gray-600">人工智能分析与投资建议</p>
       </div>
 
       <div class="text-center">
-        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span class="text-2xl font-bold text-blue-600">3</span>
+        <div class="mb-3">
+          <i data-lucide="search" class="inline-block text-blue-600 h-6 w-6"></i>
         </div>
-        <h3 class="text-xl font-semibold mb-2">获取分析结果</h3>
-        <p class="text-gray-600">系统将实时生成专业分析报告和投资建议</p>
+        <h3 class="font-medium mb-1">批量扫描</h3>
+        <p class="text-sm text-gray-600">同时分析多只股票，高效筛选</p>
       </div>
     </div>
   </section>
 
-  <!-- Disclaimer -->
-  <section class="py-8 mt-8 bg-gray-50 rounded-lg px-6">
-    <div class="text-center">
-      <h3 class="text-xl font-semibold mb-2">免责声明</h3>
-      <p class="text-gray-600 text-sm">
-        本系统提供的分析结果仅供参考，不构成投资建议。投资有风险，入市需谨慎。请务必根据自身情况做出投资决策。
-      </p>
+  <!-- Investment Wisdom Section (Preserved) -->
+  <section class="py-8 my-6 bg-gray-50 rounded-lg">
+    <div class="text-center mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">投资智慧</h2>
+      <p class="text-gray-600 text-sm">来自投资大师「段永平」的金句</p>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-4">
+      <div class="space-y-3">
+        <div class="p-3 border-l-2 border-gray-400 bg-white">
+          <p class="text-gray-700 text-sm">"买股票就是买公司，买公司就是买其未来现金流。这里现金流指的是净现金流，未来指的是公司的整个生命周期。"</p>
+        </div>
+
+        <div class="p-3 border-l-2 border-gray-400 bg-white">
+          <p class="text-gray-700 text-sm">"折现率实际上是相对于投资人的机会成本而言的。最低的机会成本就是无风险回报率，比如美国国债的利率。"</p>
+        </div>
+
+        <div class="p-3 border-l-2 border-gray-400 bg-white">
+          <p class="text-gray-700 text-sm">"所谓能看懂公司就是能看懂其未来现金流。（做对的事情）"</p>
+        </div>
+
+        <div class="p-3 border-l-2 border-gray-400 bg-white">
+          <p class="text-gray-700 text-sm">"所有所谓有关投资的说法实际上都是在讨论如何看懂现金流的问题。（如何把事情做对），比如生意模式、护城河、能力圈、等等。"</p>
+        </div>
+      </div>
     </div>
   </section>
+
+  <!-- Simplified Disclaimer -->
+  <footer class="py-4 text-center text-xs text-gray-500">
+    <p>免责声明：本系统提供的分析结果仅供参考，不构成投资建议。投资有风险，入市需谨慎。</p>
+  </footer>
 </div>
 {% endblock %}
