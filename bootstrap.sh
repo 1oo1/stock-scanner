@@ -13,7 +13,7 @@ pip install gunicorn
 mkdir -p /app/logs
 echo "$(date): Starting akshare update process" >> /app/logs/akshare_updates.log
 
-# Start a background process to update akshare every hour
+# Start a background process to update akshare periodically
 (
   while true; do
     # Make update interval configurable. Unit is seconds, default is 1h.

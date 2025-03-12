@@ -29,7 +29,7 @@ def init_logger():
 
     # Determine log level based on Flask's debug mode
     try:
-        stdout_level = "DEBUG" if current_app.debug else "ERROR"
+        stdout_level = "DEBUG" if current_app.debug else "INFO"
     except (ImportError, RuntimeError):
         # If Flask is not installed or not in application context
         stdout_level = "DEBUG"  # Default to DEBUG if can't determine

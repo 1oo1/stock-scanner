@@ -22,11 +22,13 @@ class Config:
     JWT_COOKIE_SAMESITE = "Lax"
 
     # postgresql
-    SQLALCHEMY_DATABASE_URI = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+    SQLALCHEMY_DATABASE_URI = os.getenv("DB_URL")
 
+    # register
     ENABLE_REGISTER_USER = os.getenv("ENABLE_REGISTER_USER", "False") == "True"
     REGISTER_PRIVATE_KEY = os.getenv("REGISTER_PRIVATE_KEY")
 
+    # llm
     LLM_CONFIGS = {
         "API_KEY": os.getenv("API_KEY"),
         "API_URL": os.getenv("API_URL"),
