@@ -88,14 +88,14 @@ def login():
 
     username = request.form.get("username")
     password = request.form.get("password")
+    next_url = request.form.get("next")
 
     user = User.query.filter_by(username=username).first()
 
     if user and user.check_password(password):
         access_token = create_access_token(identity=user.username)
         # Get the next URL if it exists, otherwise default to pages.index
-        next_url = request.args.get("next", url_for("pages.index"))
-        response = redirect(next_url)
+        response = redirect(next_url or url_for("pages.index"))
         set_access_cookies(response, access_token)
         logger.info(f"登录成功: {username}")
         return response
