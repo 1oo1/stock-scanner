@@ -6,15 +6,14 @@ WORKDIR /app
 
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
     ca-certificates \ 
     && rm -rf /var/lib/apt/lists/*
 
 # 设置环境变量
-# ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app
 
-# 暴露端口（如果需要）
-EXPOSE 8888
+# 复制当前目录下的所有文件到容器的工作目录
+COPY . .
 
 # 启动命令
 CMD ["bash", "bootstrap.sh"]

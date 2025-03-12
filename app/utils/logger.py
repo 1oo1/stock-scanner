@@ -5,7 +5,10 @@ from datetime import datetime
 from flask import current_app
 
 # 创建日志目录
-log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+# Get the project root directory (2 levels up from utils/logger.py)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+log_dir = os.path.join(project_root, "logs")
 os.makedirs(log_dir, exist_ok=True)
 
 
