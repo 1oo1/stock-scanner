@@ -16,7 +16,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 
-from app.models import User
+from app.models.users import User
 from app import db
 from app.utils.logger import get_logger
 
@@ -34,7 +34,7 @@ def auth_or_login(f):
             verify_jwt_in_request()
             return f(*args, **kwargs)
         except Exception as e:
-            logger.error(f"Auth error details: {type(e).__name__}: {str(e)}")
+            # logger.error(f"Auth error details: {type(e).__name__}: {str(e)}")
             # If not authenticated, redirect to login with the current URL
             return redirect(url_for("auth.login", next=request.url))
 

@@ -29,15 +29,20 @@ function csrf_token() {
 const apiService = {
   async _fetch(url, data = {}, method = 'POST') {
     try {
-      const response = await fetch(url, {
+      const options = {
         method: method,
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': csrf_token(),
         },
-        body: JSON.stringify(data),
         credentials: 'same-origin',
-      });
+      };
+
+      if (method === 'POST') {
+        options.body = JSON.stringify(data);
+      }
+
+      const response = await fetch(url, options);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -48,6 +53,13 @@ const apiService = {
       console.error('API request failed:', error);
       throw error;
     }
+  },
+
+  async get(url, params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    const fullUrl = queryString ? `${url}?${queryString}` : url;
+    const response = await this._fetch(fullUrl, {}, 'GET');
+    return response.json();
   },
 
   async post(url, data = {}) {

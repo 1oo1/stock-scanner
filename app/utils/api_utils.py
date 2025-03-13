@@ -15,9 +15,7 @@ class APIUtils:
         if not base_url:
             return ""
 
-        if base_url.endswith("/"):
-            return f"{base_url}chat/completions"
-        elif base_url.endswith("#"):
+        if base_url.endswith("#"):
             return base_url.replace("#", "")
         else:
-            return f"{base_url}/v1/chat/completions"
+            return f"{base_url.rstrip('/')}/chat/completions"

@@ -45,5 +45,5 @@ echo "$(date): Starting akshare update process" >> /app/logs/akshare_updates.log
 # Init or upgrade database.
 flask db upgrade
 
-# run Gunicorn
-gunicorn -w 2 'app:create_app()' --bind ${FLASK_HOST}:${FLASK_PORT}
+# run Gunicorn with a specified number of workers and options
+gunicorn -w ${GUNICORN_WORKERS:-2} 'app:create_app()' --bind ${FLASK_HOST:-127.0.0.1}:${FLASK_PORT:-8888} --timeout ${GUNICORN_TIMEOUT:-300} --max-requests ${GUNICORN_MAX_REQUESTS:-10} --max-requests-jitter ${GUNICORN_MAX_REQUESTS_JITTER:-5}

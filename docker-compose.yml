@@ -4,13 +4,11 @@ services:
   # PostgreSQL database service
   db:
     image: postgres
-    container_name: stock-analyzer-db
-    env_file:
-      - .env
+    container_name: stock_scanner_db
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: your_psql_username
+      POSTGRES_PASSWORD: your_psql_pwd
+      POSTGRES_DB: stock_scanner
     volumes:
       - ./db_data:/var/lib/postgresql/data
     ports:
@@ -18,17 +16,13 @@ services:
     restart: always
 
   # Stock Analyzer application service
-  # stock-analyzer:
-  #   build: .
-  #   container_name: stock-analyzer
-  #   ports:
-  #     - "127.0.0.1:8888:8888"
+  # app:
+  #   image: stock_scanner
+  #   container_name: stock_scanner
   #   env_file:
   #     - .env
-  #   environment:
-  #     - DB_URL=${DB_URL:-"postgresql://$DB_USER:$DB_PASSWORD@db:5432/$DB_NAME"}
-  #   volumes:
-  #     - .:/app
+  #   ports:
+  #     - "127.0.0.1:8888:${FLASK_PORT:-8888}"
   #   restart: always
   #   depends_on:
   #     - db

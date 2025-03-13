@@ -7,28 +7,9 @@
     <h1 class="text-3xl font-bold mb-8 text-center">技术指标分析</h1>
 
     <div class="max-w-4xl mx-auto">
-        <!-- 批量分析 -->
         <div class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold mb-4">股票批量分析</h2>
 
-            <!-- 添加市场类型选择 -->
-            <div class="mb-4">
-                <label for="marketType" class="block text-sm font-medium text-gray-700 mb-2">
-                    选择市场类型
-                </label>
-                <select id="marketType" onchange="handleMarketTypeChange()"
-                    class="w-full p-2 border rounded bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="A">A股</option>
-                    <option value="HK">港股</option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="batchStocks" class="block text-sm font-medium text-gray-700 mb-2">
-                    输入代码
-                </label>
-                <textarea id="batchStocks" class="w-full p-2 border rounded h-32"
-                    placeholder="输入代码，支持多个代码（用回车或逗号分隔）"></textarea>
-            </div>
+            <div id="stockSearch" data-stock-search class="mb-6"></div>
 
             <button id="analyzeBtn" onclick="analyzeStocks()"
                 class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 flex items-center justify-center">
@@ -106,22 +87,26 @@
             }
         </script>
         <script>
+            function handleStockSelect(item) {
+                // Handle stock selection logic here
+                console.log("Stock selected:", item);
+            }
+
             let isAnalyzing = false;
             let stockAnalysisData = {}; // 存储股票分析数据的对象
 
             async function analyzeStocks() {
                 if (isAnalyzing) return;  // 防止重复点击
 
-                const stockInput = document.getElementById('batchStocks').value.trim();
-                const marketType = document.getElementById('marketType').value;
+                const stock = document.getElementById('stockSearch').stockSearch.selectedItem;
+                if (!stock) {
+                    alert('请选择股票');
+                    return;
+                }
+
                 const analyzeBtn = document.getElementById('analyzeBtn');
                 const loadingSpinner = document.getElementById('loadingSpinner');
                 const resultContent = document.getElementById('resultContent');
-
-                if (!stockInput) {
-                    alert('请输入代码');
-                    return;
-                }
 
                 try {
                     isAnalyzing = true;
@@ -139,15 +124,16 @@
                     resultContent.appendChild(resultsContainer);
 
                     for await (const chunk of apiService.stream('/analyze', {
-                        stock_code: stockInput,
-                        market_type: marketType,
+                        stock_code: stock.stock_code,
+                        stock_name: stock.stock_name,
+                        market_type: stock.market_type,
                     })) {
-                        handleStreamChunk(chunk, resultsContainer, marketType);
+                        handleStreamChunk(chunk, resultsContainer, stock.market_type);
                     }
                 } catch (error) {
                     console.error('请求失败:', error);
                     resultContent.innerHTML = `
-                    <div class="p-6 bg-yellow-50 text-yellow-600 rounded-lg text-center">
+                    <div class="p-6 bg-red-50 text-red-600 rounded-lg text-center">
                         分析出错：${error.message}
                     </div>
                 `;
@@ -249,7 +235,7 @@
                 <!-- 头部信息 -->
                 <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
                     <h3 class="text-xl font-bold text-white">
-                        ${result.stock_code}
+                    ${result.stock_name}(${result.stock_code})
                     </h3>
                 </div>
                 
@@ -507,4 +493,6 @@
                 addMarkdownStyles();
             });
         </script>
+
+        <script src="{{ url_for('static', filename='js/stock-search.js') }}"></script>
         {% endblock %}

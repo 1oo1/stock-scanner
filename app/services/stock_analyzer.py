@@ -3,25 +3,14 @@ import numpy as np
 from datetime import datetime, timedelta
 import json
 from app.utils.logger import get_logger
+from app.utils.akshare import get_akshare
 
 # 获取日志器
 logger = get_logger()
 
 
 class StockAnalyzer:
-    def __init__(
-        self,
-        custom_api_url=None,
-        custom_api_key=None,
-        custom_api_model=None,
-        custom_api_timeout=None,
-    ):
-        # 设置 API 配置，优先使用自定义配置，否则使用环境变量
-        self.API_URL = custom_api_url
-        self.API_KEY = custom_api_key
-        self.API_MODEL = custom_api_model
-        self.API_TIMEOUT = int(custom_api_timeout or 60)
-
+    def __init__(self):
         # 配置参数 - 分市场类型设置不同参数
         self.market_params = {
             "A": {
@@ -57,7 +46,7 @@ class StockAnalyzer:
         end_date=None,
     ):
         """获取股票数据"""
-        import akshare as ak
+        ak = get_akshare()
 
         if start_date is None:
             start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
@@ -540,11 +529,11 @@ class StockAnalyzer:
             logger.exception(e)
             return 0  # 出错时返回0分
 
-    def _get_ai_analysis(self, df, stock_code, market_type="A"):
+    def _get_ai_analysis(self, df, stock_code, stock_name, market_type="A"):
         """使用 OpenAI 进行 AI 分析"""
         try:
             type_name = "A股" if market_type == "A" else "港股"
-            logger.info(f"开始AI分析中国{type_name}股票 {stock_code}")
+            logger.info(f"开始AI分析中国{type_name}股票 {stock_name}({stock_code})")
             recent_data = df.tail(60).to_dict("records")
 
             technical_summary = {
@@ -560,7 +549,7 @@ class StockAnalyzer:
 
             # 生成提示词
             prompt = f"""
-            分析中国{type_name}股市场股票 {stock_code}：
+            分析中国{type_name}股市场股票 {stock_name}({stock_code})：
 
             技术指标概要：
             {technical_summary}
@@ -583,11 +572,6 @@ class StockAnalyzer:
                 f"生成的AI分析提示词: {self._truncate_json_for_logging(prompt, 100)}..."
             )
 
-            payload = {
-                "model": self.API_MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-            }
-
             from app.services import get_llm_service_pool
 
             # 获取 LLM 服务池
@@ -595,12 +579,10 @@ class StockAnalyzer:
 
             # 流式处理设置
             try:
-                logger.debug(f"请求载荷: {self._truncate_json_for_logging(payload)}")
-
                 for content in llm_service_pool.chat(
                     messages=[{"role": "user", "content": prompt}]
                 ):
-                    # if content has error
+                    # 如果内容有错误
                     if "error" in content:
                         logger.error(f"AI分析返回错误: {content['error']}")
                         yield json.dumps(
@@ -659,10 +641,12 @@ class StockAnalyzer:
         else:
             return "强烈建议卖出"
 
-    def analyze_stock(self, stock_code, market_type="A"):
+    def analyze_stock(self, stock_code, stock_name, market_type="A"):
         """分析单个股票"""
         try:
-            logger.info(f"开始分析股票: {stock_code}, 市场: {market_type}")
+            logger.info(
+                f"开始分析股票: {stock_name}({stock_code}), 市场: {market_type}"
+            )
 
             # 保存当前股票代码用于指标计算
             self.current_stock_code = stock_code
@@ -694,6 +678,7 @@ class StockAnalyzer:
 
             # 生成报告（保持原有格式）
             report = {
+                "stock_name": stock_name,
                 "stock_code": stock_code,
                 "analysis_date": datetime.now().strftime("%Y-%m-%d"),
                 "score": score,
@@ -709,7 +694,6 @@ class StockAnalyzer:
                 f"生成股票 {stock_code} 基础报告: {self._truncate_json_for_logging(report, 100)}..."
             )
 
-            logger.info(f"以流式模式返回股票 {stock_code} 分析结果")
             # 先返回基本报告结构
             base_report = dict(report)
             base_report["ai_analysis"] = ""
@@ -721,12 +705,13 @@ class StockAnalyzer:
             yield base_report_json
 
             # 然后流式返回AI分析部分
-            logger.debug(f"开始获取股票 {stock_code} 的流式AI分析")
             ai_chunks_count = 0
-            for ai_chunk in self._get_ai_analysis(df, stock_code):
+            for ai_chunk in self._get_ai_analysis(
+                df, stock_code, stock_name, market_type
+            ):
                 ai_chunks_count += 1
                 yield ai_chunk
-            logger.info(
+            logger.debug(
                 f"股票 {stock_code} 流式AI分析完成，共发送 {ai_chunks_count} 个块"
             )
 
