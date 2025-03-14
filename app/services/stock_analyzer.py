@@ -49,7 +49,7 @@ class StockAnalyzer:
         ak = get_akshare()
 
         if start_date is None:
-            start_date = (datetime.now() - timedelta(days=365)).strftime("%Y%m%d")
+            start_date = (datetime.now() - timedelta(days=365 * 2)).strftime("%Y%m%d")
         if end_date is None:
             end_date = datetime.now().strftime("%Y%m%d")
 
@@ -64,7 +64,12 @@ class StockAnalyzer:
                 )
                 # A股数据列名映射
             elif market_type == "HK":
-                df = ak.stock_hk_daily(symbol=stock_code, adjust="qfq")
+                df = ak.stock_hk_hist(
+                    symbol=stock_code,
+                    start_date=start_date,
+                    end_date=end_date,
+                    adjust="qfq",
+                )
 
             else:
                 raise ValueError(f"不支持的市场类型: {market_type}")
@@ -532,41 +537,56 @@ class StockAnalyzer:
     def _get_ai_analysis(self, df, stock_code, stock_name, market_type="A"):
         """使用 OpenAI 进行 AI 分析"""
         try:
+            # Mapping of English to Chinese column names
+            df = df.rename(
+                columns={
+                    "date": "日期",
+                    "open": "开盘",
+                    "close": "收盘",
+                    "high": "最高",
+                    "low": "最低",
+                    "volume": "成交量",
+                }
+            )
             type_name = "A股" if market_type == "A" else "港股"
-            logger.info(f"开始AI分析中国{type_name}股票 {stock_name}({stock_code})")
-            recent_data = df.tail(60).to_dict("records")
+            # recent_data = df.tail(60).to_dict("records")
+            # recent_data = df.to_dict("records")
 
-            technical_summary = {
-                "trend": (
-                    "upward" if df.iloc[-1]["MA5"] > df.iloc[-1]["MA20"] else "downward"
-                ),
-                "volatility": f"{df.iloc[-1]['Volatility']:.2f}%",
-                "volume_trend": (
-                    "increasing" if df.iloc[-1]["Volume_Ratio"] > 1 else "decreasing"
-                ),
-                "rsi_level": df.iloc[-1]["RSI"],
-            }
+            # Convert the DataFrame to a markdown table
+            recent_data = df.to_markdown(index=True)
+
+            # technical_summary = {
+            #     "trend": (
+            #         "upward" if df.iloc[-1]["MA5"] > df.iloc[-1]["MA20"] else "downward"
+            #     ),
+            #     "volatility": f"{df.iloc[-1]['Volatility']:.2f}%",
+            #     "volume_trend": (
+            #         "increasing" if df.iloc[-1]["Volume_Ratio"] > 1 else "decreasing"
+            #     ),
+            #     "rsi_level": df.iloc[-1]["RSI"],
+            # }
 
             # 生成提示词
-            prompt = f"""
-            分析中国{type_name}股市场股票 {stock_name}({stock_code})：
+            prompt = f"""# 请分析中国{type_name}股票 {stock_name}({stock_code})：
+            
+## 近{len(df)}天的前复权交易数据：
 
-            技术指标概要：
-            {technical_summary}
-            
-            近60日交易数据：
-            {recent_data}
-            
-            请提供：
-            1. 趋势分析（包含支撑位和压力位）
-            2. 成交量分析及其含义
-            3. 风险评估（包含波动率分析）
-            4. 短期和中期目标价位
-            5. 关键技术位分析
-            6. 具体交易建议（包含止损位）
-            
-            请基于技术指标和市场动态进行分析，给出具体数据支持。
-            """
+{recent_data}
+
+## 请提供：
+1. 趋势分析（包含支撑位和压力位）
+2. 成交量分析及其含义
+3. 风险评估（包含波动率分析）
+4. 短期和中期目标价位
+5. 关键技术位分析
+6. 具体交易建议（包含合适的买入价格、卖出价格和止损位）
+
+## 注意：请严谨的基于技术指标和市场动态数据进行分析，给出具体数据支持，否则会造成金钱的损失！！！
+
+回复请用中文，简洁明了，避免冗长的解释。
+
+只需返回分析结果，不要包含任何其他信息。
+"""
 
             logger.debug(
                 f"生成的AI分析提示词: {self._truncate_json_for_logging(prompt, 100)}..."
@@ -580,7 +600,13 @@ class StockAnalyzer:
             # 流式处理设置
             try:
                 for content in llm_service_pool.chat(
-                    messages=[{"role": "user", "content": prompt}]
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "你是一位经验丰富的投资者，擅长中国A股和港股市场，尤其擅长技术分析。请根据提供的交易数据进行深入分析，并给出具体的投资建议。不确定的请求不要给出建议。请注意，投资有风险，决策需谨慎。",
+                        },
+                        {"role": "user", "content": prompt},
+                    ]
                 ):
                     # 如果内容有错误
                     if "error" in content:
