@@ -305,6 +305,8 @@ class LLMServicePool:
         self.last_service_index = -1
         # Lock to protect the last_service_index variable
         self.selection_lock = threading.Lock()
+        # Flag for pool shutdown
+        self.is_shutdown = False
 
         # Initialize services and locks
         for config in service_configs:
@@ -325,9 +327,6 @@ class LLMServicePool:
         # Start queue processing thread
         self.queue_processor = threading.Thread(target=self._process_queue, daemon=True)
         self.queue_processor.start()
-
-        # Flag for pool shutdown
-        self.is_shutdown = False
 
     def chat(
         self,

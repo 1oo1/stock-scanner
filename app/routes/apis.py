@@ -48,7 +48,6 @@ def search_stocks():
 @jwt_required()
 def analyze():
     try:
-        logger.info("开始处理分析请求")
         data = request.json
         stock_code = data.get("stock_code", "")
         stock_name = data.get("stock_name", "")

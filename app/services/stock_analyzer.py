@@ -644,10 +644,6 @@ class StockAnalyzer:
     def analyze_stock(self, stock_code, stock_name, market_type="A"):
         """分析单个股票"""
         try:
-            logger.info(
-                f"开始分析股票: {stock_name}({stock_code}), 市场: {market_type}"
-            )
-
             # 保存当前股票代码用于指标计算
             self.current_stock_code = stock_code
 
@@ -655,8 +651,8 @@ class StockAnalyzer:
             self.params = self.market_params.get(market_type, self.market_params["A"])
 
             # 获取股票数据
-            logger.debug(f"获取股票 {stock_code} 数据")
             df = self._get_stock_data(stock_code, market_type)
+            logger.debug(f"获取股票 {stock_name} {stock_code} 数据成功: {df}")
 
             # 计算技术指标
             logger.debug(f"计算股票 {stock_code} 技术指标")
@@ -665,7 +661,6 @@ class StockAnalyzer:
             # 评分系统
             logger.debug(f"计算股票 {stock_code} 评分")
             score = self._calculate_score(df, market_type)
-            logger.info(f"股票 {stock_code} 评分结果: {score}")
 
             # 获取最新数据
             latest = df.iloc[-1]
@@ -701,19 +696,13 @@ class StockAnalyzer:
             logger.debug(
                 f"基础报告JSON: {self._truncate_json_for_logging(base_report_json, 100)}..."
             )
-            logger.info(f"发送基础报告: {base_report_json}")
             yield base_report_json
 
             # 然后流式返回AI分析部分
-            ai_chunks_count = 0
             for ai_chunk in self._get_ai_analysis(
                 df, stock_code, stock_name, market_type
             ):
-                ai_chunks_count += 1
                 yield ai_chunk
-            logger.debug(
-                f"股票 {stock_code} 流式AI分析完成，共发送 {ai_chunks_count} 个块"
-            )
 
         except Exception as e:
             error_msg = f"分析股票 {stock_code} 时出错: {str(e)}"
