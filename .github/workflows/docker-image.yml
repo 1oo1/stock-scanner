@@ -1,8 +1,10 @@
 name: Docker Build and Push
 
 on:
+  # main 分支推送时触发 & 手动执行
   push:
-    branches: [ main ]  # 只在 main 分支推送时触发
+    branches: [ main ]  
+  workflow_dispatch:
 
 jobs:
   build:
