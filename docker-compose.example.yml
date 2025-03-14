@@ -16,13 +16,15 @@ services:
     restart: always
 
   # Stock Analyzer application service
-  # app:
-  #   image: stock_scanner
-  #   container_name: stock_scanner
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "127.0.0.1:8888:${FLASK_PORT:-8888}"
-  #   restart: always
-  #   depends_on:
-  #     - db
+  app:
+    image: stock_scanner
+    container_name: stock_scanner
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8888:${FLASK_PORT:-8888}"
+    volumes:
+      - ./logs:/app/logs
+    restart: always
+    depends_on:
+      - db

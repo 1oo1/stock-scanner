@@ -1,5 +1,5 @@
-# 使用 Python 3.11 作为基础镜像
-FROM python:3.11-slim
+# 使用 Python 3.12 作为基础镜像
+FROM python:3.12-slim
 
 # 设置工作目录
 WORKDIR /app
@@ -12,8 +12,11 @@ RUN apt-get update && apt-get install -y \
 # 设置环境变量
 ENV PYTHONPATH=/app
 
-# 复制当前目录下的所有文件到容器的工作目录
+# 复制文件。忽略的文件在 .dockerignore 中定义
 COPY . .
 
+# 设置执行权限（在切换用户之前）
+RUN chmod +x bootstrap.sh
+
 # 启动命令
-CMD ["bash", "bootstrap.sh"]
+CMD ["./bootstrap.sh"]

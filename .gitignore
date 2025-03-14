@@ -183,3 +183,5 @@ cython_debug/
 #.idea/
 
 db_data/
+
+docker-compose.yml

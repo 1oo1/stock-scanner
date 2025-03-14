@@ -11,7 +11,6 @@ pip install gunicorn
 
 # Add initial log entry when script starts
 mkdir -p /app/logs
-echo "$(date): Starting akshare update process" >> /app/logs/akshare_updates.log
 
 # Start a background process to update akshare periodically
 (
@@ -21,6 +20,8 @@ echo "$(date): Starting akshare update process" >> /app/logs/akshare_updates.log
 
     # Then use this variable
     sleep $UPDATE_INTERVAL
+
+    echo "$(date): Starting akshare update process" >> /app/logs/akshare_updates.log
 
     # Get the current version of akshare before update
     OLD_VERSION=$(pip show akshare 2>/dev/null | grep "Version" | awk '{print $2}')
