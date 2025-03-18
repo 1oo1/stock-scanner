@@ -1,13 +1,10 @@
 #!/bin/bash
 
 # Install the latest version of pip
-python3 -m pip install --upgrade pip
+pip install --upgrade pip
 
-# Install the latest version of dependencies
-pip install --no-cache-dir --upgrade -r requirements.txt
-
-pip install gunicorn
-
+# Install the latest version of akshare
+pip install --no-cache-dir --upgrade akshare
 
 # Add initial log entry when script starts
 mkdir -p /app/logs

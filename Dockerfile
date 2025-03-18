@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \ 
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install gunicorn
+
 # 设置环境变量
 ENV PYTHONPATH=/app
 
