@@ -11,6 +11,7 @@ load_dotenv()
 class Config:
     FLASK_PORT = int(os.getenv("FLASK_PORT", "8888"))
     FLASK_HOST = os.getenv("FLASK_HOST", "127.0.0.1")
+    DEBUG = os.getenv("FLASK_DEBUG", "False") == "True"
 
     # jwt
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")

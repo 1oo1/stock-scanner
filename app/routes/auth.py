@@ -99,7 +99,7 @@ def login():
     cf_ip = request.headers.get("CF-Connecting-IP")
 
     if cf_turnstile_secrect:
-        logger.info(f"CF Turnstile 验证: {cf_turnstile_response} {cf_ip}")
+        # logger.info(f"CF Turnstile 验证: {cf_turnstile_response} {cf_ip}")
         try:
             requests.post(
                 "https://challenges.cloudflare.com/turnstile/v0/siteverify",

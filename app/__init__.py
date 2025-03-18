@@ -3,11 +3,8 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
 from app.config import get_flask_config
-from app.utils.logger import get_logger
+from app.utils.logger import init_logger
 from app.routes import init_app_routes
-
-# Initialize logger
-logger = get_logger()
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -29,6 +26,9 @@ def create_app():
 
     # Register blueprints
     init_app_routes(app)
+
+    # Initialize logger
+    init_logger("DEBUG" if app.config.get("DEBUG") else "INFO")
 
     # Optional: Register error handlers
     @app.errorhandler(404)

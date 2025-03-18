@@ -2,7 +2,6 @@ from loguru import logger
 import sys
 import os
 from datetime import datetime
-from flask import current_app
 
 # 创建日志目录
 # Get the project root directory (2 levels up from utils/logger.py)
@@ -12,27 +11,11 @@ log_dir = os.path.join(project_root, "logs")
 os.makedirs(log_dir, exist_ok=True)
 
 
-def init_logger():
+def init_logger(stdout_level="INFO"):
     """初始化日志配置"""
-
-    global did_init_logger
-    if "did_init_logger" not in globals():
-        did_init_logger = False
-
-    if did_init_logger:
-        return
-
-    did_init_logger = True
 
     # 配置日志
     logger.remove()  # 移除默认的处理器
-
-    # Determine log level based on Flask's debug mode
-    try:
-        stdout_level = "DEBUG" if current_app.debug else "INFO"
-    except (ImportError, RuntimeError):
-        # If Flask is not installed or not in application context
-        stdout_level = "DEBUG"  # Default to DEBUG if can't determine
 
     # 添加标准输出处理器（控制台）
     logger.add(
@@ -79,5 +62,4 @@ def get_logger():
     """获取通用日志器"""
     # 启动时清理旧日志
     clean_old_logs()
-    init_logger()
     return logger
