@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL database service
   db:
@@ -17,8 +15,8 @@ services:
 
   # Stock Analyzer application service
   app:
-    image: stock_scanner
-    container_name: stock_scanner
+    image: hoho113/llm-stock-analyzer
+    container_name: llm-stock-analyzer
     env_file:
       - .env
     ports:

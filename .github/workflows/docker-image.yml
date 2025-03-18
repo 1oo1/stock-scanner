@@ -1,40 +1,92 @@
-name: Docker Build and Push
+name: Release & Docker Build and Push
 
 on:
-  # main 分支推送时触发 & 手动执行
   push:
-    branches: [ main ]  
+    tags:
+      - "v*.*.*"
+    # branches: [ main ]  
   workflow_dispatch:
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-    
-    - name: Get current time
-      id: time
-      run: echo "TIME=$(date +'%Y%m%d%H%M')" >> $GITHUB_ENV
-    
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Get the latest commits messages and output them to a variable
+      - name: Get git commits
+        id: get_commits
+        run: |
+          PREVIOUS_TAG=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1))
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "No previous tag found, using all commits up to $CURRENT_TAG"
+            COMMITS=$(git log $CURRENT_TAG --pretty=format:"- %s")
+          else
+            COMMITS=$(git log ${PREVIOUS_TAG}..${CURRENT_TAG} --pretty=format:"- %s")
+          fi
+
+          echo "COMMIT_MSGS<<EOF" >> $GITHUB_ENV
+          echo "$COMMITS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: comnoco/create-release-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ｜
+            Changes in this Release
+            ${{ env.COMMIT_MSGS }}
+          draft: false
+          prerelease: false
+
+  docker:
+    needs: [release]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/llm-stock-analyzer
+          ghcr.io/${{ github.repository_owner }}/llm-stock-analyzer
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=ref,event=branch
+          type=semver,pattern={{version}}
+          type=sha
+
     - name: Login to Docker Hub
-      uses: docker/login-action@v1
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-    
-    - name: Build and push
-      uses: docker/build-push-action@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
       with:
-        context: .
-        platforms: linux/amd64,linux/arm64
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
         push: true
-        tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/llm-stock-analyzer:latest
-          ${{ secrets.DOCKERHUB_USERNAME }}/llm-stock-analyzer:${{ env.TIME }}
+        platforms: linux/amd64,linux/arm64
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
