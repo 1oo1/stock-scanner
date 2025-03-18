@@ -28,6 +28,10 @@ class Config:
     ENABLE_REGISTER_USER = os.getenv("ENABLE_REGISTER_USER", "False") == "True"
     REGISTER_PRIVATE_KEY = os.getenv("REGISTER_PRIVATE_KEY")
 
+    # cf turnstile
+    CF_TURNSTILE_SITE_KEY = os.getenv("CF_TURNSTILE_SITE_KEY", "")
+    CF_TURNSTILE_SECRET_KEY = os.getenv("CF_TURNSTILE_SECRET_KEY", "")
+
     # llm
     LLM_CONFIGS = {
         "API_KEY": os.getenv("API_KEY"),

@@ -1,5 +1,6 @@
 # Auth blueprint
 from functools import wraps
+import requests
 from flask import (
     Blueprint,
     redirect,
@@ -84,11 +85,33 @@ def login():
         pass
 
     if request.method == "GET":
-        return render_template("login.html")
+        return render_template(
+            "login.html",
+            cf_turnstile_sitekey=current_app.config["CF_TURNSTILE_SITE_KEY"],
+        )
 
     username = request.form.get("username")
     password = request.form.get("password")
     next_url = request.form.get("next")
+
+    cf_turnstile_response = request.form.get("cf-turnstile-response")
+    cf_turnstile_secrect = current_app.config["CF_TURNSTILE_SECRET_KEY"]
+    cf_ip = request.headers.get("CF-Connecting-IP")
+
+    if cf_turnstile_secrect:
+        logger.info(f"CF Turnstile 验证: {cf_turnstile_response}")
+        try:
+            requests.post(
+                "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+                json={
+                    "response": cf_turnstile_response,
+                    "secret": cf_turnstile_secrect,
+                    "remoteip": cf_ip,
+                },
+                headers={"Content-Type": "application/json"},
+            )
+        except:
+            return render_template("login.html", error_msg="CF Turnstile 验证失败")
 
     user = User.query.filter_by(username=username).first()
 
